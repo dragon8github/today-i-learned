@@ -1,0 +1,32 @@
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Microsoft Yahei';
+  user-select: none;
+  width: 100%;
+  height: 100%;
+  background-color: #F9F9F9;
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

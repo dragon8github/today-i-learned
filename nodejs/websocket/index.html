@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Test</title>
+</head>
+
+<body>
+    <div id="app"></div>
+</body>
+<script>
+    const ws = new WebSocket('ws://localhost:6080')
+
+    ws.addEventListener('open', () => {
+        ws.send('client ok')
+    })
+
+    ws.addEventListener('message', e => {
+        console.log(e.data)
+    })
+</script>
+</html>
