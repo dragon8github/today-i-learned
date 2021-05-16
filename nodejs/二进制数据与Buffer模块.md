@@ -37,6 +37,17 @@ buf1.write("hello world")
 // 解码buffer，因为 buf1 只能承载10个字节的内容，所有多处的东西会被截断
 console.log(buf1.toString()) // => 'hello worl'
 
+// 补充：也可以用数组参数
+const buf3 = Buffer.from([110, 120, 119])
+
+// => 110
+console.log(buf3[0])
+
+// 也可以以 buffer 为参数
+const buf4 = Buffer.from(buf3)
+
+// => 110
+console.log(buf4[0])
 /////////////////////////////////
 // alloc 和 allocUnsafe 的区别 //
 /////////////////////////////////
@@ -48,6 +59,34 @@ console.log(buf)
 // 分配给定的内存大小，无法设置初始值，而且该内存原本是什么样就是什么样。
 var buf2 = Buffer.allocUnsafe(10)
 console.log(buf2)
+```
+
+## 写入大尾与小尾
+
+一言难尽，还是自己看 demo 领悟吧。
+
+- BE大尾：大的数据在后边
+- LE小尾：小的数据在后边
+
+```javascript
+buf = Buffer.from('helloworld')
+// <Buffer 68 65 6c 6c 6f 77 6f 72 6c 64>
+console.log(buf)
+
+// 65535 => 00 00 ff ff
+buf.writeInt32BE(65535, 0)
+// <Buffer 00 00 ff ff 6f 77 6f 72 6c 64>
+console.log(buf)
+
+// 65535 => 00 00 ff ff
+buf.writeInt32LE(65535, 0)
+// <Buffer ff ff 00 00 6f 77 6f 72 6c 64>
+console.log(buf)
+
+// 读取
+value = buf.readInt32LE(0)
+// 65535
+console.log(value)
 ```
 
 ## 二进制
@@ -80,3 +119,17 @@ console.log(buf2)
 Uint 即有符号的整数。什么是符号？就是正负。
 
 所以 int 家族只能表示正数，而 Uint 家族可以表示正负。
+
+```javascript
+// 返回一个字符串的实际字节长度
+var len = Buffer.byteLength('李钊鸿')
+
+// 9
+console.log(len)
+
+// 也可以接受一个 buffer
+var len2 = Buffer.byteLength(Buffer.from('HelloWorld'))
+
+// 10
+console.log(len2)
+```

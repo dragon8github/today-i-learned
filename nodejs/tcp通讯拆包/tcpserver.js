@@ -1,5 +1,5 @@
 let net = require('net')
-let netpkg = require('./netpkg')
+let { read_pkg_size } = require('./netpkg')
 
 let pkg = null
 let __STEP__ = 2
@@ -8,13 +8,11 @@ let server = net.createServer(function (client_sock) {
     console.log(`「client comming」 🐤 ${client_sock.remoteAddress}:${client_sock.remotePort}`)
 
     client_sock.on('data', function (data) {
-        
-        pkg = pkg != null 
-            ? Buffer.concat([pkg, data], pkg.length + data.length) 
-            : data
+        // 初始化或者迭代
+        pkg = pkg ? Buffer.concat([pkg, data], pkg.length + data.length) : data
 
         let offset = 0
-        let pkg_len = netpkg.read_pkg_size(pkg, offset)
+        let pkg_len = read_pkg_size(pkg, offset)
         if (pkg_len < 0) {
             return
         }
@@ -38,7 +36,7 @@ let server = net.createServer(function (client_sock) {
                 break
             }
 
-            pkg_len = netpkg.read_pkg_size(pkg, offset)
+            pkg_len = read_pkg_size(pkg, offset)
             if (pkg_len < 0) {
                 break
             }
