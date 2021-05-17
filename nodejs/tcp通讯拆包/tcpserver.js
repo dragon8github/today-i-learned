@@ -2,55 +2,57 @@ let net = require('net')
 let { read_pkg_size } = require('./netpkg')
 
 let pkg = null
-let __STEP__ = 2
 
 let server = net.createServer(function (client_sock) {
-    console.log(`「client comming」 🐤 ${client_sock.remoteAddress}:${client_sock.remotePort}`)
+    console.log(`「client comming」 ${client_sock.remoteAddress}:${client_sock.remotePort}`)
 
     client_sock.on('data', function (data) {
-        // 初始化或者迭代
+        // 「初始化」或者「合并迭代」
         pkg = pkg ? Buffer.concat([pkg, data], pkg.length + data.length) : data
 
         let offset = 0
-        let pkg_len = read_pkg_size(pkg, offset)
-        if (pkg_len < 0) {
+        let pkg_size = read_pkg_size(pkg, offset)
+        if (pkg_size === 0) {
             return
         }
 
-        while (offset + pkg_len <= pkg.length) {
-            // 判断是否有完整的包
-            // 根据长度信息来读取我们的数据（假设我们传过来的是文本数）
-            // 2个长度信息
-            let cmd_buf = Buffer.allocUnsafe(pkg_len - __STEP__) 
-            pkg.copy(cmd_buf, 0, offset + __STEP__, offset + pkg_len)
+        console.log(pkg.length, offset, pkg_size)
 
-            // cmd_buf：用户发过来的命令的数据
-            console.log('recv Cmd: ', cmd_buf) 
+        while (pkg.length >= offset + pkg_size) {
+            // 创建一个空 buffer
+            let content = Buffer.allocUnsafe(pkg_size - 2)
+            
+            // 从 Pkg 中抽取数据赋值给 content
+            pkg.copy(content, 0, offset + 2, offset + pkg_size)
 
-            console.log(cmd_buf.toString('utf8'))
+            // 接受到包信息
+            console.log('接受到包信息：', content, content.toString('utf8')) 
 
-            offset += pkg_len
+            offset += pkg_size
 
             // 包处理完了
             if (offset >= pkg.length) {
                 break
             }
 
-            pkg_len = read_pkg_size(pkg, offset)
-            if (pkg_len < 0) {
+            pkg_size = read_pkg_size(pkg, offset)
+            if (pkg_size === 0) {
                 break
             }
         }
 
-        // 能处理的数据包已经处理完成了
+
+        // 说明所有数据处理完了。
         if (offset >= pkg.length) {
             pkg = null
         } else {
+            // 还没处理好，说明还存在一些「残包」等待发送过来
             let buf = Buffer.allocUnsafe(pkg.length - offset)
 
-            // 将这段数据拷贝到新的Buffer里面
+            // 将剩余的所有数据拷贝到新的Buffer里面
             pkg.copy(buf, 0, offset, pkg.length)
 
+            // 储存
             pkg = buf
         }
     })
